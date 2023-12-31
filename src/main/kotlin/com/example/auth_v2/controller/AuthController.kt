@@ -11,6 +11,8 @@ import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.CookieValue
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -62,5 +64,30 @@ class AuthController(
         response.addCookie(cookie)
 
         return ResponseEntity.ok(Message("success"))
+    }
+
+    @GetMapping("user")
+    fun user(@CookieValue("jwt") jwt: String?): ResponseEntity<Any> {
+        try {
+            if (jwt == null) {
+                return ResponseEntity.status(401).body(Message("Un Auth"))
+            }
+
+            val body = Jwts.parser().setSigningKey("secret").parseClaimsJws(jwt).body
+
+            return ResponseEntity.ok(services.getById(body.issuer.toInt()))
+        } catch (e: Exception) {
+            return ResponseEntity.status(401).body(Message(e.localizedMessage.toString()))
+        }
+    }
+
+    @PostMapping("logout")
+    fun logout(response: HttpServletResponse): ResponseEntity<Any> {
+
+        val cookie = Cookie("jwt", "")
+        cookie.maxAge = 0
+        response.addCookie(cookie)
+        return ResponseEntity.ok(Message("success"))
+
     }
 }

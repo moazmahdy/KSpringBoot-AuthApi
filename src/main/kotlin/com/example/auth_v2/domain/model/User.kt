@@ -1,5 +1,6 @@
 package com.example.auth_v2.domain.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
@@ -18,6 +19,7 @@ data class User(
     var email: String,
 
     @Column
+    @JsonIgnore
     var password: String
 ) {
     companion object {
